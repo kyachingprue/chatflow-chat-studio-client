@@ -40,8 +40,9 @@ const DashboardLayout = () => {
       : "bg-gradient-to-br from-black via-purple-950 to-pink-950";
 
   return (
-    <div className={`min-h-screen flex ${backgroundStyle} text-white`}>
-      {/* SIDEBAR */}
+    <div className={`min-h-screen flex flex-col lg:flex-row ${backgroundStyle} text-white`}>
+
+      {/* LARGE DEVICE SIDEBAR */}
       <aside
         className={`hidden lg:flex flex-col transition-all duration-300
         ${isOpen ? "w-64" : "w-20"} bg-white/5 backdrop-blur-xl border-r border-white/10`}
@@ -81,7 +82,24 @@ const DashboardLayout = () => {
         </nav>
       </aside>
 
-      {/* MAIN */}
+      {/* SMALL DEVICE BOTTOM NAV */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/5 backdrop-blur-xl border-t border-white/10 flex justify-around p-2 z-50">
+        {menuItems.map((item) => (
+          <NavLink
+            key={item.name}
+            to={item.path}
+            className={({ isActive }) =>
+              `flex flex-col items-center justify-center text-xs text-white transition
+              ${isActive ? "text-pink-400" : "text-white/70 hover:text-pink-300"}`
+            }
+          >
+            <item.icon className="w-6 h-6" />
+            <span className="text-[10px]">{item.name}</span>
+          </NavLink>
+        ))}
+      </nav>
+
+      {/* MAIN CONTENT */}
       <div className="flex-1 flex flex-col">
         {/* NAVBAR */}
         <header className="h-16 flex items-center justify-between px-6 bg-white/5 backdrop-blur-xl border-b border-white/10">
@@ -92,7 +110,6 @@ const DashboardLayout = () => {
           </Link>
 
           <div className="flex items-center gap-4">
-            {/* Dummy Notification */}
             <div className="relative">
               <Bell className="w-6 h-6 cursor-pointer" />
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-600 text-xs rounded-full flex items-center justify-center">
@@ -100,7 +117,6 @@ const DashboardLayout = () => {
               </span>
             </div>
 
-            {/* Dummy Profile */}
             <img
               src="https://i.ibb.co/vC5WKqSk/9187532.png"
               alt="Profile"
@@ -111,7 +127,6 @@ const DashboardLayout = () => {
 
         {/* PAGE CONTENT */}
         <main className="flex-1 p-6 overflow-y-auto">
-          {/* Dynamic page content */}
           <Outlet />
         </main>
       </div>

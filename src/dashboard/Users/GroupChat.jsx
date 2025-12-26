@@ -16,13 +16,16 @@ const dummyMessages = [
 ];
 
 const GroupChat = () => {
-  const [selectedGroup, setSelectedGroup] = useState(dummyGroups[0]);
+  const [selectedGroup, setSelectedGroup] = useState(null);
 
   return (
     <div className="h-[calc(100vh-64px)] flex bg-black/40 rounded-2xl overflow-hidden border border-white/10 shadow-lg">
 
       {/* LEFT – GROUP LIST */}
-      <div className="w-80 border-r border-white/10 bg-white/5 backdrop-blur-xl p-4 flex flex-col">
+      <div
+        className={`w-80 border-r border-white/10 bg-white/5 backdrop-blur-xl p-4 flex flex-col transition-transform duration-300
+        ${selectedGroup ? "-translate-x-full absolute z-50 top-0 bottom-0 lg:translate-x-0 lg:relative" : ""}`}
+      >
         {/* SEARCH */}
         <div className="mb-4">
           <div className="flex items-center bg-black/40 rounded-lg px-3 py-2">
@@ -61,7 +64,11 @@ const GroupChat = () => {
       </div>
 
       {/* RIGHT – CHAT AREA */}
-      <div className="flex-1 flex flex-col relative">
+      <div
+        className={`flex-1 flex flex-col relative transition-transform duration-300
+        ${!selectedGroup && "hidden lg:flex"}
+        ${selectedGroup ? "flex-1 absolute inset-0 z-40 bg-black/80 lg:relative lg:bg-transparent" : ""}`}
+      >
         {/* TOP HEADER */}
         <div className="h-16 flex items-center px-4 border-b border-white/10 bg-black/30 backdrop-blur-xl">
           <button
@@ -91,8 +98,8 @@ const GroupChat = () => {
               <div
                 key={msg.id}
                 className={`max-w-xs px-4 py-2 rounded-2xl ${msg.sender === "me"
-                    ? "self-end bg-purple-600 text-white"
-                    : "self-start bg-white/10 text-white"
+                  ? "self-end bg-purple-600 text-white"
+                  : "self-start bg-white/10 text-white"
                   }`}
               >
                 {msg.text}

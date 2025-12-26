@@ -1,15 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Bell, LogOut, User } from "lucide-react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const navigate = useNavigate();
 
   // Fake user data
-  const [user, setUser] = useState({
+  const [user] = useState({
     username: "John Doe",
     image: "https://i.pravatar.cc/40",
   });
@@ -31,11 +29,6 @@ export default function Navbar() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  const handleLogout = () => {
-    setUser(null);
-    navigate("/login");
-  };
 
   return (
     <nav
@@ -94,7 +87,7 @@ function MobileMenu({ user }) {
           <Link to="/" className="px-4 py-2 hover:bg-gray-700 rounded">Home</Link>
           <Link to="/about" className="px-4 py-2 hover:bg-gray-700 rounded">About</Link>
           <Link to="/services" className="px-4 py-2 hover:bg-gray-700 rounded">Services</Link>
-          {user && <Link to="/dashboard" className="px-4 py-2 hover:bg-gray-700 rounded">Dashboard</Link>}
+          {user && <Link to="/dashboard/chat" className="px-4 py-2 hover:bg-gray-700 rounded">Dashboard</Link>}
 
           {!user ? (
             <button className="px-4 py-2 bg-blue-600 text-white rounded-lg mx-4 mt-2">Login</button>

@@ -15,19 +15,22 @@ const dummyMessages = [
 ];
 
 const Chat = () => {
-  const [selectedFriend, setSelectedFriend] = useState(friends[0]);
+  const [selectedFriend, setSelectedFriend] = useState(null);
 
   return (
     <div className="h-[calc(100vh-64px)] flex bg-black/40 rounded-2xl overflow-hidden border border-white/10 shadow-lg">
 
-      {/* LEFT – FRIEND LIST */}
-      <div className="w-80 border-r border-white/10 bg-white/5 backdrop-blur-xl p-4 flex flex-col gap-4">
+      {/* FRIEND LIST */}
+      <div
+        className={`w-80 border-r border-white/10 bg-white/5 backdrop-blur-xl p-4 flex flex-col gap-4 transition-transform duration-300
+        ${selectedFriend ? "-translate-x-full absolute z-50 top-0 bottom-0 lg:translate-x-0 lg:relative" : "translate-x-0"}`}
+      >
         <h2 className="text-white font-bold text-lg mb-2">Friends</h2>
         {friends.map((friend) => (
           <div
             key={friend.id}
-            className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-white/10 transition ${selectedFriend?.id === friend.id ? "bg-purple-600/30" : ""
-              }`}
+            className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-white/10 transition
+              ${selectedFriend?.id === friend.id ? "bg-purple-600/30" : ""}`}
             onClick={() => setSelectedFriend(friend)}
           >
             <img
@@ -40,9 +43,12 @@ const Chat = () => {
         ))}
       </div>
 
-      {/* RIGHT – CHAT AREA */}
-      <div className="flex-1 flex flex-col relative">
-        {/* TOP HEADER */}
+      {/* CHAT AREA */}
+      <div
+        className={`flex-1 flex flex-col relative transition-transform duration-300
+        ${!selectedFriend ? "hidden lg:flex" : "flex-1 absolute inset-0 z-40 bg-black/80"}`}
+      >
+        {/* HEADER */}
         <div className="h-16 flex items-center px-4 border-b border-white/10 bg-black/30 backdrop-blur-xl">
           <button
             className="mr-4 p-2 rounded-lg hover:bg-white/10 lg:hidden"
@@ -64,15 +70,15 @@ const Chat = () => {
           )}
         </div>
 
-        {/* CHAT MESSAGES */}
+        {/* MESSAGES */}
         <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-3 bg-black/20">
           {selectedFriend &&
             dummyMessages.map((msg) => (
               <div
                 key={msg.id}
                 className={`max-w-xs px-4 py-2 rounded-2xl ${msg.sender === "me"
-                    ? "self-end bg-purple-600 text-white"
-                    : "self-start bg-white/10 text-white"
+                  ? "self-end bg-purple-600 text-white"
+                  : "self-start bg-white/10 text-white"
                   }`}
               >
                 {msg.text}
@@ -80,7 +86,7 @@ const Chat = () => {
             ))}
         </div>
 
-        {/* CHAT INPUT */}
+        {/* INPUT */}
         {selectedFriend && (
           <div className="h-16 flex items-center px-4 border-t border-white/10 bg-black/30 backdrop-blur-xl gap-2">
             <input
