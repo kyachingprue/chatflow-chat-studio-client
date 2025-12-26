@@ -1,34 +1,27 @@
-import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { UserPlus, UserMinus, Check } from "lucide-react";
 
 const AddFriend = () => {
   const queryClient = useQueryClient();
-  // ✅ Lazy initializer: token directly from localStorage
-  const [token] = useState(() => localStorage.getItem("token") || null);
+  const token = localStorage.getItem("token");
 
-  // ✅ useQuery only runs when token is available
+  // Fetch all users except current user
   const { data: users = [], isLoading, isError } = useQuery({
     queryKey: ["usersNotFriends"],
     queryFn: async () => {
       if (!token) throw new Error("User not authenticated");
 
-      const res = await axios.get(
-        "http://localhost:8000/api/users/not-friends",
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const res = await axios.get("http://localhost:8000/api/friends/not-friends", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       return Array.isArray(res.data?.data) ? res.data.data : [];
     },
-    enabled: !!token, // run query only if token exists
+    enabled: !!token,
   });
 
-
-  const [friendRequests, setFriendRequests] = useState({});
-  const [friends, setFriends] = useState({});
-
-  // Add friend mutation
+  // Add Friend mutation
   const addFriendMutation = useMutation({
     mutationFn: (userId) =>
       axios.post(
@@ -36,32 +29,43 @@ const AddFriend = () => {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       ),
-    onSuccess: (data, userId) => {
-      setFriendRequests((prev) => ({ ...prev, [userId]: true }));
+    onSuccess: () => {
       queryClient.invalidateQueries(["usersNotFriends"]);
+      queryClient.invalidateQueries(["receivedFriendRequests"]);
+    },
+    onError: (err) => {
+      alert(err.response?.data?.message || "Failed to send friend request");
     },
   });
 
-  // Remove friend mutation
+  // Remove Friend mutation
   const removeFriendMutation = useMutation({
     mutationFn: (userId) =>
       axios.delete(`http://localhost:8000/api/friends/remove/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       }),
-    onSuccess: (data, userId) => {
-      setFriends((prev) => {
-        const newFriends = { ...prev };
-        delete newFriends[userId];
-        return newFriends;
-      });
-      setFriendRequests((prev) => {
-        const newRequests = { ...prev };
-        delete newRequests[userId];
-        return newRequests;
-      });
-      queryClient.invalidateQueries(["usersNotFriends"]);
-    },
+    onSuccess: () => queryClient.invalidateQueries(["usersNotFriends"]),
+    onError: (err) => alert(err.response?.data?.message || "Failed to remove friend"),
   });
+
+  // Fetch received friend requests (who sent request to me)
+  const { data: receivedRequests = [] } = useQuery({
+    queryKey: ["receivedFriendRequests"],
+    queryFn: async () => {
+      const res = await axios.get(
+        "http://localhost:8000/api/friends/received",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      return res.data?.data || [];
+    },
+    enabled: !!token,
+  });
+
+  // user list এ friendRequests / friends থাকে না
+  const isRequestSent = (user) =>
+    receivedRequests.some((u) => u._id === user._id);
+
+  const isFriend = () => false; // not-friends list এ friend থাকে না
 
   if (isLoading) return <p className="text-white text-center">Loading users...</p>;
   if (isError) return <p className="text-red-500 text-center">Failed to load users</p>;
@@ -71,10 +75,7 @@ const AddFriend = () => {
       <h1 className="text-2xl font-bold text-white mb-4">Add New Friends</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {users.map((user) => (
-          <div
-            key={user._id}
-            className="flex flex-col items-center p-4 bg-white/5 rounded-xl border border-white/10 shadow-lg"
-          >
+          <div key={user._id} className="flex flex-col items-center p-4 bg-white/5 rounded-xl border border-white/10 shadow-lg">
             <img
               src={user.image || "https://i.pravatar.cc/100"}
               alt={user.username}
@@ -83,7 +84,7 @@ const AddFriend = () => {
             <p className="text-white font-medium">{user.username}</p>
 
             <div className="mt-2 flex gap-2">
-              {!friends[user._id] && !friendRequests[user._id] && (
+              {!isFriend(user) && !isRequestSent(user) && (
                 <button
                   onClick={() => addFriendMutation.mutate(user._id)}
                   className="flex items-center gap-2 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
@@ -92,21 +93,15 @@ const AddFriend = () => {
                 </button>
               )}
 
-              {friendRequests[user._id] && !friends[user._id] && (
-                <button
-                  disabled
-                  className="flex items-center gap-2 px-3 py-1 bg-gray-600 text-white rounded-lg cursor-not-allowed"
-                >
+              {isRequestSent(user) && !isFriend(user) && (
+                <button disabled className="flex items-center gap-2 px-3 py-1 bg-gray-600 text-white rounded-lg cursor-not-allowed">
                   <Check size={16} /> Request Sent
                 </button>
               )}
 
-              {friends[user._id] && (
+              {isFriend(user) && (
                 <>
-                  <button
-                    disabled
-                    className="flex items-center gap-2 px-3 py-1 bg-green-600 text-white rounded-lg cursor-not-allowed"
-                  >
+                  <button disabled className="flex items-center gap-2 px-3 py-1 bg-green-600 text-white rounded-lg cursor-not-allowed">
                     <Check size={16} /> Friends
                   </button>
                   <button

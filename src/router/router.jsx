@@ -23,6 +23,7 @@ import VerifyOTP from "../pages/VerifyOTP";
 import ResetPassword from "../pages/ResetPassword";
 import Profile from "../pages/Profile";
 import { VerifyEmailInfo } from "../pages/VerifyEmailInfo";
+import FriendRequests from "../pages/FriendRequests";
 
 const router = createBrowserRouter([
   {
@@ -80,6 +81,10 @@ const router = createBrowserRouter([
       {
         path: 'explore',
         element: <Explore/>
+      },
+      {
+        path: 'friend-requests',
+        element: <FriendRequests />
       },
       // Admin data
       {

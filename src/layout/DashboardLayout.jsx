@@ -9,18 +9,44 @@ import {
   Shield,
   BarChart3,
   Flag,
+  Bell,
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 
 const DashboardLayout = () => {
-  const [user] = useState(() => {
-    const storedUser = localStorage.getItem("user");
-    return storedUser ? JSON.parse(storedUser) : null;
-  });
+  const [user] = useState(() => JSON.parse(localStorage.getItem("user")));
+  const token = localStorage.getItem("token");
+  const isRole = user?.role || "user";
 
-  const isRole = user?.role || "user"; 
+  /* ----------------------------------------
+     ✅ Fetch ONLY friend request COUNT
+     ---------------------------------------- */
+  const { data: friendRequestCount = 0 } = useQuery({
+    queryKey: ["friendRequestCount"],
+    queryFn: async () => {
+      if (!token) return 0;
+
+      const res = await axios.get(
+        "http://localhost:8000/api/friends/received",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      return Array.isArray(res.data?.data)
+        ? res.data.data.length
+        : 0;
+    },
+    enabled: !!token,
+    refetchInterval: 5000, // auto refresh like Facebook
+  });
 
   const [isOpen, setIsOpen] = useState(true);
 
+  /* ----------------------------------------
+     MENU CONFIG
+     ---------------------------------------- */
   const userMenu = [
     { name: "Chat", icon: MessageSquare, path: "/dashboard/chat" },
     { name: "Group Chat", icon: Users, path: "/dashboard/group-chat" },
@@ -47,16 +73,15 @@ const DashboardLayout = () => {
   return (
     <div className={`min-h-screen flex ${backgroundStyle} text-white`}>
 
-      {/* SIDEBAR */}
+      {/* ================= SIDEBAR ================= */}
       <aside
         className={`hidden lg:flex flex-col transition-all duration-300
         ${isOpen ? "w-64" : "w-20"}
         bg-white/5 backdrop-blur-xl border-r border-white/10`}
       >
-        {/* Sidebar Header */}
         <div className="flex items-center justify-between p-4">
           {isOpen && (
-            <h2 className="text-xl font-bold tracking-wide">
+            <h2 className="text-xl font-bold">
               {isRole === "admin" ? "Admin Panel" : "Dashboard"}
             </h2>
           )}
@@ -68,7 +93,6 @@ const DashboardLayout = () => {
           </button>
         </div>
 
-        {/* Menu */}
         <nav className="flex-1 px-3 space-y-2">
           {menuItems.map((item) => (
             <NavLink
@@ -85,69 +109,43 @@ const DashboardLayout = () => {
               }
             >
               <item.icon className="w-5 h-5" />
-              {isOpen && <span className="font-medium">{item.name}</span>}
+              {isOpen && <span>{item.name}</span>}
             </NavLink>
           ))}
         </nav>
       </aside>
 
-      {/* MOBILE SIDEBAR */}
-      <aside className="lg:hidden fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-xl border-t border-white/10 flex justify-around py-3 z-50">
-        {menuItems.map((item) => (
-          <NavLink
-            key={item.name}
-            to={item.path}
-            className="p-2 rounded-lg hover:bg-white/10"
-          >
-            <item.icon className="w-6 h-6" />
-          </NavLink>
-        ))}
-      </aside>
-
-      {/* MAIN CONTENT */}
+      {/* ================= MAIN ================= */}
       <div className="flex-1 flex flex-col">
 
-        {/* NAVBAR */}
-        <header className="h-16 flex items-center justify-between px-6
-          bg-white/5 backdrop-blur-xl border-b border-white/10">
-
+        {/* -------- NAVBAR -------- */}
+        <header className="h-16 flex items-center justify-between px-6 bg-white/5 backdrop-blur-xl border-b border-white/10">
           <Link to="/">
-            <h1
-              className={`text-2xl font-bold bg-linear-to-r
-              ${isRole === "admin"
-                  ? "from-emerald-400 to-cyan-400"
-                  : "from-pink-500 to-purple-400"
-                }
-              bg-clip-text text-transparent`}
-            >
-              ChatFlow {isRole === "admin" && "Admin"}
+            <h1 className="text-2xl font-bold bg-linear-to-r from-pink-500 to-purple-400 bg-clip-text text-transparent">
+              ChatFlow
             </h1>
           </Link>
 
           <div className="flex items-center gap-4">
-            {isRole === "admin" && (
-              <span className="px-3 py-1 text-sm rounded-full bg-emerald-600/20 text-emerald-400">
-                Admin Access
-              </span>
-            )}
-            {isRole === "user" && (
-              <span className="px-3 py-1 text-sm rounded-full bg-black text-white">
-                user Access
-              </span>
-            )}
+            {/* 🔔 Notification */}
+            <Link to="/dashboard/friend-requests" className="relative">
+              <Bell className="w-6 h-6 cursor-pointer" />
+              {friendRequestCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-600 text-xs rounded-full flex items-center justify-center">
+                  {friendRequestCount}
+                </span>
+              )}
+            </Link>
 
             <img
-              src={
-                user?.image ||
-                "https://i.ibb.co/vC5WKqSk/9187532.png" // default avatar
-              }
+              src={user?.image || "https://i.ibb.co/vC5WKqSk/9187532.png"}
               alt="Profile"
-              className="w-10 h-10 rounded-full object-cover ring-2 ring-pink-500 cursor-pointer"
+              className="w-10 h-10 rounded-full ring-2 ring-pink-500"
             />
           </div>
         </header>
 
-        {/* PAGE CONTENT */}
+        {/* -------- PAGE CONTENT -------- */}
         <main className="flex-1 p-6 overflow-y-auto">
           <Outlet />
         </main>
