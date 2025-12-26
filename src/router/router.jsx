@@ -15,15 +15,7 @@ import Users from "../dashboard/Admin/Users";
 import Chats from "../dashboard/Admin/Chats";
 import Reports from "../dashboard/Admin/Reports";
 import Security from "../dashboard/Admin/Security";
-import { VerifyEmail } from "../pages/VerifyEmail";
-import { Register } from "../pages/Register";
-import { Login } from "../pages/Login";
-import { ForgetPassword } from "../pages/ForgetPassword";
-import VerifyOTP from "../pages/VerifyOTP";
-import ResetPassword from "../pages/ResetPassword";
 import Profile from "../pages/Profile";
-import { VerifyEmailInfo } from "../pages/VerifyEmailInfo";
-import FriendRequests from "../pages/FriendRequests";
 
 const router = createBrowserRouter([
   {
@@ -42,14 +34,6 @@ const router = createBrowserRouter([
       {
         path: "services",
         element: <Services/>
-      },
-      {
-        path: "/verify-email",
-        element: <VerifyEmailInfo />
-      },
-      {
-        path:"verify/:token",
-        element:<VerifyEmail />
       },
       {
         path: 'profile',
@@ -82,10 +66,6 @@ const router = createBrowserRouter([
         path: 'explore',
         element: <Explore/>
       },
-      {
-        path: 'friend-requests',
-        element: <FriendRequests />
-      },
       // Admin data
       {
         path: 'admin/overview',
@@ -108,27 +88,7 @@ const router = createBrowserRouter([
         element: <Security/>
       }
     ]
-  },
-  {
-    path: "/login",
-    element: <Login/>
-  },
-  {
-    path: "/register",
-    element: <Register/>
-  },
-  {
-    path:"/forget-password",
-    element: < ForgetPassword />
-  },
-  {
-    path: "/verify-otp/:email",
-    element: < VerifyOTP />
-  },
-  {
-  path: "/reset-password/:email",
-  element: <ResetPassword />
- }
+  }
 ])
 
 export default router;

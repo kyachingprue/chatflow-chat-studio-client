@@ -1,13 +1,8 @@
 import { motion } from "motion/react"
-import { useState } from "react";
 import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 export default function Banner() {
-  const [user] = useState(() => {
-      const storedUser = localStorage.getItem("user");
-      return storedUser ? JSON.parse(storedUser) : null;
-    });
   return (
     <section className="relative h-[90vh] w-full flex items-center justify-center overflow-hidden bg-linear-to-r from-blue-600 via-blue-500 to-sky-400
     mt-16 text-white">
@@ -65,7 +60,7 @@ export default function Banner() {
 
         {/* Button */}
         <div className="mt-12">
-          <Link to={user ? "/dashboard/chat" : "/login"}>
+          <Link to="/dashboard/chat">
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
