@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import useAuth from "./useAuth";
 import Socket from "../services/Socket";
+import useAuth from "./useAuth";
 
 const useSocket = () => {
   const { user } = useAuth();

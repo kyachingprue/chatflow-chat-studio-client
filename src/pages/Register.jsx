@@ -34,22 +34,22 @@ const Register = () => {
     setLoading(true);
     try {
       // 1️⃣ Firebase register
-      const userCredential = await registerUser(data.email, data.password);
-      const user = userCredential.user;
+      const userCredential = await registerUser(data?.email, data?.password);
+      const user = userCredential?.user;
 
       const defaultPhotoURL = "https://i.ibb.co.com/C31ZMR2t/360-F-724597608-pmo5-Bs-Vum-Fc-Fy-HJKl-ASG2-Y2-Kpkkfi-YUU.jpg";
       const profile = {
-        displayName: data.name,
+        displayName: data?.name,
         photoURL: defaultPhotoURL,
       };
       await profileUpdate(user, profile); 
       // 2️⃣ Send data to MongoDB
       await createUserMutation.mutateAsync({
-        uid: user.uid,
-        name: data.name,
-        email: user.email,
+        uid: user?.uid,
+        name: data?.name,
+        email: user?.email,
         role: "user",
-        image: user.defaultPhotoURL,
+        image: user?.defaultPhotoURL,
         cover: 'https://i.ibb.co.com/wFvZn7s8/Red-White-and-Black-Corporate-Virtual-Assistant-Linked-In-Article-Cover-Image.png',
         isVerified: false,
         createdAt: new Date(),
