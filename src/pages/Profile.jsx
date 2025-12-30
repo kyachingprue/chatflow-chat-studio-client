@@ -133,7 +133,6 @@ const Profile = () => {
         </div>
       )}
 
-      {/* ================= COVER ================= */}
       <div className="relative w-full h-64 md:h-96 rounded-xl overflow-hidden shadow-lg">
         <img
           src={userData.cover || DEFAULT_COVER}
@@ -190,7 +189,7 @@ const Profile = () => {
 
         {/* Info */}
         <div className="mt-4 md:mt-20 md:ml-6 text-center md:text-left">
-          <h2 className="text-2xl md:text-3xl font-bold">
+          <h2 className="text-2xl text-black md:text-3xl font-bold">
             {userData.name}
           </h2>
           <p className="text-gray-500">{userData.email}</p>

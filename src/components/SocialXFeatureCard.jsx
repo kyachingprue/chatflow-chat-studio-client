@@ -57,15 +57,6 @@ export default function SocialXFeatureCard() {
                 </motion.div>
               ))}
             </div>
-
-            {/* CTA */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="mt-6 inline-flex items-center justify-center px-7 py-3 rounded-xl bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-semibold shadow-lg"
-            >
-              Get Started with SocialX
-            </motion.button>
           </motion.div>
 
           {/* RIGHT – Image / Animation */}
