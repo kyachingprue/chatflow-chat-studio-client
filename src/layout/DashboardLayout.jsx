@@ -1,5 +1,5 @@
-import { Link, NavLink, Outlet } from "react-router-dom";
-import { useState } from "react";
+import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import {
   MessageSquare,
   Users,
@@ -10,15 +10,57 @@ import {
   BarChart3,
   Flag,
   Bell,
+  LogOut,
+  User
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import useAuth from "../hooks/useAuth";
+import useAxiosSecure from "../hooks/useAxiosSecure";
+import useSocket from "../hooks/useSocket";
 
 const DashboardLayout = () => {
   const [isOpen, setIsOpen] = useState(true);
-  const isRole = "user"; // Change to "admin" to test admin UI
+  const { user, logoutUser } = useAuth();
+  const navigate = useNavigate();
+  const socket = useSocket();
+  const [requestCount, setRequestCount] = useState(0);
+  const axiosSecure = useAxiosSecure();
+  const [openProfile, setOpenProfile] = useState(false);
 
+  const { data: dbUser } = useQuery({
+    queryKey: ["dbUser", user?.email],
+    enabled: !!user?.email,
+    queryFn: async () => {
+      const res = await axiosSecure.get(`/users/${user.email}`);
+      return res.data;
+    },
+  });
+
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on("friend-request-notification", () => {
+      setRequestCount(prev => prev + 1);
+    });
+
+    return () => socket.off("friend-request-notification");
+  }, [socket]);
+
+  useQuery({
+    queryKey: ["friend-request-count", user?.uid],
+    enabled: !!user?.uid,
+    queryFn: async () => {
+      const res = await axiosSecure.get(
+        `/friends/requests/count/${user.uid}`
+      );
+      setRequestCount(res.data.count);
+      return res.data;
+    },
+  });
+
+  const isRole = dbUser?.role || "user"; // "admin" or "user"
   const userMenu = [
     { name: "Chat", icon: MessageSquare, path: "/dashboard/chat" },
-    { name: "Group Chat", icon: Users, path: "/dashboard/group-chat" },
     { name: "Friends", icon: Users, path: "/dashboard/friends" },
     { name: "Add Friend", icon: UserPlus, path: "/dashboard/add-friend" },
     { name: "Explore", icon: Compass, path: "/dashboard/explore" },
@@ -38,6 +80,12 @@ const DashboardLayout = () => {
     isRole === "admin"
       ? "bg-gradient-to-br from-slate-950 via-gray-900 to-black"
       : "bg-gradient-to-br from-black via-purple-950 to-pink-950";
+  
+  const handleLogout = async () => {
+    console.log("dashboard logout-->");
+    await logoutUser()
+    navigate('/login')
+  }
 
   return (
     <div className={`min-h-screen flex flex-col lg:flex-row ${backgroundStyle} text-white`}>
@@ -110,18 +158,69 @@ const DashboardLayout = () => {
           </Link>
 
           <div className="flex items-center gap-4">
-            <div className="relative">
-              <Bell className="w-6 h-6 cursor-pointer" />
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-600 text-xs rounded-full flex items-center justify-center">
-                3
-              </span>
+            <div
+              className="relative cursor-pointer"
+              onClick={() => navigate("/dashboard/friend-requests")}
+            >
+              <Bell className="w-6 h-6" />
+              {requestCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-600 text-xs rounded-full flex items-center justify-center">
+                  {requestCount}
+                </span>
+              )}
             </div>
 
-            <img
-              src="https://i.ibb.co/vC5WKqSk/9187532.png"
-              alt="Profile"
-              className="w-10 h-10 rounded-full ring-2 ring-pink-500"
-            />
+            <div className="relative">
+              <button
+                onClick={() => setOpenProfile(!openProfile)}
+                className="flex items-center"
+              >
+                <img
+                  src={dbUser?.image || "https://i.ibb.co/vC5WKqSk/9187532.png"}
+                  alt="Profile"
+                  className="w-10 h-10 rounded-full ring-2 ring-cyan-300 cursor-pointer object-cover"
+                />
+              </button>
+
+              {openProfile && (
+                <div className="absolute right-0 mt-3 w-48 bg-black/80 backdrop-blur-xl border border-white/10 rounded-xl shadow-lg z-50 animate-fadeIn">
+
+                  {/* AVATAR */}
+                  <div className="flex flex-col items-center py-4">
+                    <img
+                      src={user?.image || "https://i.ibb.co/vC5WKqSk/9187532.png"}
+                      className="w-14 h-14 rounded-full ring-2 ring-pink-500 mb-2"
+                    />
+                    <p className="text-sm font-semibold text-white text-center">
+                      {user?.displayName || "User"}
+                    </p>
+                  </div>
+
+                  <div className="border-t border-white/10" />
+
+                  {/* PROFILE */}
+                  <Link
+                    to="/profile"
+                    onClick={() => setOpenProfile(false)}
+                    className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-white/10 transition"
+                  >
+                    <User className="w-4 h-4 text-pink-400" />
+                    Profile
+                  </Link>
+
+                  {/* LOGOUT */}
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-red-500/20 w-full transition"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+
+
           </div>
         </header>
 

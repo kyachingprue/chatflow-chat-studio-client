@@ -6,7 +6,6 @@ import Services from "../pages/Services";
 import ErrorPage from "../pages/ErrorPage";
 import DashboardLayout from "../layout/DashboardLayout";
 import Chat from "../dashboard/Users/Chat";
-import GroupChat from "../dashboard/Users/GroupChat";
 import Friends from "../dashboard/Users/Friends";
 import AddFriend from "../dashboard/Users/AddFriend";
 import Explore from "../dashboard/Users/Explore";
@@ -15,7 +14,17 @@ import Users from "../dashboard/Admin/Users";
 import Chats from "../dashboard/Admin/Chats";
 import Reports from "../dashboard/Admin/Reports";
 import Security from "../dashboard/Admin/Security";
+import Register from "../pages/Register";
+import Login from "../pages/Login";
+import VerifyEmail from "../pages/VerifyEmail";
+import EmailVerifiedSuccess from "../pages/EmailVerifiedSuccess";
+import ForgotPassword from "../pages/ForgotPassword";
+import CheckEmail from "../pages/CheckEmail";
+import ResetPassword from "../pages/ResetPassword";
+import FriendRequests from "../dashboard/Users/FriendRequests";
 import Profile from "../pages/Profile";
+import PrivateRoute from "./PrivateRoute";
+import AdminRoute from "./AdminRoute";
 
 const router = createBrowserRouter([
   {
@@ -37,58 +46,86 @@ const router = createBrowserRouter([
       },
       {
         path: 'profile',
-        element: <Profile/>
+        element:<Profile/> 
       }
     ]
   },
   {
     path: '/dashboard',
-    element: <DashboardLayout />,
+    element: <PrivateRoute><DashboardLayout /></PrivateRoute>,
     children: [
     // User data
       {
         path: 'chat',
-        element: <Chat/>
-      },
-      {
-        path: 'group-chat',
-        element: <GroupChat/>
+        element: <PrivateRoute><Chat /></PrivateRoute>
       },
       {
         path: 'friends',
-        element: <Friends/>
+        element: <PrivateRoute><Friends /></PrivateRoute>
       },
       {
         path: 'add-friend',
-        element: <AddFriend/>
+        element: <PrivateRoute><AddFriend /></PrivateRoute>
+      },
+      {
+        path: "friend-requests",
+        element: <PrivateRoute><FriendRequests /></PrivateRoute>
       },
       {
         path: 'explore',
-        element: <Explore/>
+        element: <PrivateRoute><Explore /></PrivateRoute>
       },
       // Admin data
       {
         path: 'admin/overview',
-        element: <Overview/>
+        element: <AdminRoute><Overview /></AdminRoute>
       },
       {
         path: 'admin/users',
-        element: <Users/>
+        element: <AdminRoute><Users /></AdminRoute>
       },
       {
         path: 'admin/chats',
-        element: <Chats/>
+        element: <AdminRoute></AdminRoute>
       },
       {
         path: 'admin/reports',
-        element: <Reports/>
+        element: <AdminRoute><Reports /></AdminRoute>
       },
       {
         path: 'admin/security',
-        element: <Security/>
+        element: <AdminRoute><Security /></AdminRoute>
       }
     ]
-  }
+  },
+  {
+    path:"/register",
+    element:< Register />
+    
+    },
+  {
+    path: "/login",
+    element: < Login />
+  },
+  {
+    path: "/verify-email",
+    element: < VerifyEmail />
+  },
+  {
+    path: "/verified-success",
+    element: < EmailVerifiedSuccess />
+  },
+  {
+    path: "/forgot-password",
+    element: < ForgotPassword />
+  },
+  {
+    path: "/check-email",
+    element: < CheckEmail />
+  },
+  {
+    path: "/reset-password",
+    element:< ResetPassword />}
 ])
 
 export default router;

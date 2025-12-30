@@ -1,60 +1,156 @@
-import { useState } from "react";
-import { UserPlus, Check } from "lucide-react";
-
-const dummyUsers = [
-  { id: 1, username: "Alice", image: "https://i.pravatar.cc/100?img=1" },
-  { id: 2, username: "Bob", image: "https://i.pravatar.cc/100?img=2" },
-  { id: 3, username: "Charlie", image: "https://i.pravatar.cc/100?img=3" },
-  { id: 4, username: "Diana", image: "https://i.pravatar.cc/100?img=4" },
-  { id: 5, username: "Eve", image: "https://i.pravatar.cc/100?img=5" },
-  { id: 6, username: "Frank", image: "https://i.pravatar.cc/100?img=6" },
-];
+import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import useAuth from "../../hooks/useAuth";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
+import useSocket from "../../hooks/useSocket";
+import toast from "react-hot-toast";
 
 const AddFriend = () => {
-  const [users] = useState(dummyUsers);
-  const [sentRequests, setSentRequests] = useState([]);
+  const { user } = useAuth();
+  const axiosSecure = useAxiosSecure();
+  const socket = useSocket();
+  const [loadingId, setLoadingId] = useState(null);
 
-  const handleAddFriend = (userId) => {
-    if (!sentRequests.includes(userId)) {
-      setSentRequests([...sentRequests, userId]);
+  // 🔹 Fetch unknown users
+  const {
+    data: users = [],
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["unknown-users", user?.uid],
+    enabled: !!user?.uid,
+    queryFn: async () => {
+      const res = await axiosSecure.get(`/users/unknown/${user.uid}`);
+      return res.data;
+    },
+  });
+
+  // 🔹 Socket listener
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on("new-friend-request", ({ senderUid }) => {
+      console.log("New request from:", senderUid);
+    });
+
+    return () => {
+      socket.off("new-friend-request");
+    };
+  }, [socket]);
+
+  const sendRequest = async (uid) => {
+    try {
+      setLoadingId(uid);
+
+      await axiosSecure.post("/friends/request", {
+        senderUid: user.uid,
+        receiverUid: uid,
+      });
+
+      if (socket) {
+        socket.emit("friend-request", {
+          senderUid: user.uid,
+          receiverUid: uid,
+        });
+      }
+      toast.success("Friend request successful")
+      refetch();
+    } catch (error) {
+      if (error.response?.status === 409) {
+        toast.success("Request already sent");
+      } else {
+        console.error(error);
+        toast.error("Request faild")
+      }
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
+  const removeRequest = async (uid) => {
+    try {
+      setLoadingId(uid);
+      await axiosSecure.delete("/friends/request", {
+        data: { senderUid: user.uid, receiverUid: uid },
+      });
+      toast.success("Friend request remove successfully")
+      refetch();
+    } finally {
+      setLoadingId(null);
     }
   };
 
   return (
-    <div className="p-4 flex flex-col space-y-4 h-full overflow-y-auto bg-black/40 rounded-2xl border border-white/10">
-      <h1 className="text-2xl font-bold text-white mb-4">Add New Friends</h1>
+    <div className="space-y-6">
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {users.map((user) => {
-          const requestSent = sentRequests.includes(user.id);
+      {/* 🔹 Header */}
+      <div className="flex items-center justify-between bg-white/5 p-4 rounded-xl">
+        <h2 className="text-xl font-semibold">➕ Add New Friend</h2>
 
-          return (
+        <Link
+          to="/dashboard/friend-requests"
+          className="px-4 py-2 rounded-full bg-purple-600 hover:bg-purple-700"
+        >
+          Friend Requests
+        </Link>
+      </div>
+
+      {/* 🔹 Loading Skeleton */}
+      {isLoading && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="p-4 rounded-xl bg-white/5 animate-pulse">
+              <div className="w-20 h-20 rounded-full bg-gray-600 mx-auto mb-3" />
+              <div className="h-4 bg-gray-600 rounded mb-2" />
+              <div className="h-3 bg-gray-700 rounded w-3/4 mx-auto" />
+              <div className="h-8 bg-gray-600 rounded-full mt-4" />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* 🔹 User Cards */}
+      {!isLoading && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {users.map(u => (
             <div
-              key={user.id}
-              className="flex flex-col items-center p-4 bg-white/5 rounded-2xl border border-white/10 shadow-lg hover:bg-white/10 transition"
+              key={u.uid}
+              className="bg-white/5 p-4 rounded-xl text-center hover:scale-[1.02] transition"
             >
               <img
-                src={user.image}
-                alt={user.username}
-                className="w-20 h-20 rounded-full mb-3 ring-2 ring-purple-500"
+                src={u.image || "https://i.ibb.co/vC5WKqSk/9187532.png"}
+                className="w-20 h-20 rounded-full mx-auto object-cover mb-2"
               />
-              <p className="text-white font-medium text-lg">{user.username}</p>
+              <h3 className="font-semibold">{u.name}</h3>
+              <p className="text-sm text-gray-400">{u.email}</p>
 
-              <button
-                onClick={() => handleAddFriend(user.id)}
-                disabled={requestSent}
-                className={`mt-3 flex items-center gap-2 px-4 py-2 rounded-full text-white font-semibold transition ${requestSent
-                    ? "bg-gray-600 cursor-not-allowed"
-                    : "bg-purple-600 hover:bg-purple-700"
-                  }`}
-              >
-                {requestSent ? <Check size={16} /> : <UserPlus size={16} />}
-                {requestSent ? "Request Sent" : "Add Friend"}
-              </button>
+              {!u.requestSent ? (
+                <button
+                  onClick={() => sendRequest(u.uid)}
+                  disabled={loadingId === u.uid}
+                  className="mt-3 px-4 py-1 bg-purple-600 rounded-full disabled:opacity-50"
+                >
+                  {loadingId === u.uid ? "Sending..." : "Add Friend"}
+                </button>
+              ) : (
+                <div className="mt-3 flex gap-2 justify-center">
+                  <button disabled className="px-3 py-1 bg-gray-500 rounded-full">
+                    Request Sent
+                  </button>
+                  <button
+                    onClick={() => removeRequest(u.uid)}
+                    disabled={loadingId === u.uid}
+                    className="px-3 py-1 bg-red-500 rounded-full"
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
             </div>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

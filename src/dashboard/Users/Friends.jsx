@@ -1,25 +1,58 @@
-import { useState } from "react";
-import { UserPlus } from "lucide-react";
-
-const dummyFriends = [
-  { id: 1, username: "Alice", isOnline: true, image: "https://i.pravatar.cc/40?img=1" },
-  { id: 2, username: "Bob", isOnline: false, image: "https://i.pravatar.cc/40?img=2" },
-  { id: 3, username: "Charlie", isOnline: true, image: "https://i.pravatar.cc/40?img=3" },
-  { id: 4, username: "Diana", isOnline: false, image: "https://i.pravatar.cc/40?img=4" },
-  { id: 5, username: "Eve", isOnline: true, image: "https://i.pravatar.cc/40?img=5" },
-  { id: 6, username: "Frank", isOnline: true, image: "https://i.pravatar.cc/40?img=6" },
-];
+import { UserPlus, Trash2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import toast from "react-hot-toast";
+import useAuth from "../../hooks/useAuth";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
+import { useNavigate } from "react-router-dom";
+import LoadingSpinner from "../../components/LoadingSpinner";
 
 const Friends = () => {
-  const [friends] = useState(dummyFriends);
+  const { user } = useAuth();
+  const axiosSecure = useAxiosSecure();
+  const navigate = useNavigate();
+
+  const {
+    data: friends = [],
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["friends", user?.uid],
+    enabled: !!user?.uid,
+    queryFn: async () => {
+      const res = await axiosSecure.get(`/friends/${user.uid}`);
+      return res.data;
+    },
+  });
+
+  const deleteFriend = async (friendUid) => {
+    try {
+      await axiosSecure.delete("/friends", {
+        data: {
+          userUid: user.uid,
+          friendUid,
+        },
+      });
+
+      toast.success("Friend removed");
+      refetch();
+    } catch {
+      toast.error("Failed to remove friend");
+    }
+  };
+
+  if (isLoading) {
+    return <LoadingSpinner text="Loading friends..."/>
+  }
 
   return (
     <div className="flex flex-col h-full p-4 bg-black/40 rounded-2xl border border-white/10 overflow-hidden">
-      {/* Top Bar */}
+
+      {/* TOP BAR */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-white">My Friends</h1>
+
         <button
-          onClick={() => alert("Add Friend clicked!")}
+          onClick={() => navigate("/dashboard/add-friend")}
           className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition"
         >
           <UserPlus size={18} />
@@ -27,30 +60,40 @@ const Friends = () => {
         </button>
       </div>
 
-      {/* Friends Grid */}
+      {/* EMPTY STATE */}
+      {friends.length === 0 && (
+        <p className="text-white/60 text-center mt-10">
+          You don’t have any friends yet 😢
+        </p>
+      )}
+
+      {/* FRIENDS GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 overflow-y-auto flex-1">
-        {friends.map((friend) => (
+        {friends.map(friend => (
           <div
-            key={friend.id}
-            className="bg-white/5 rounded-2xl p-4 flex flex-col items-center gap-3 cursor-pointer hover:bg-white/10 transition shadow-lg"
+            key={friend.uid}
+            className="bg-white/5 rounded-xl p-4 flex flex-col h-56 items-center gap-3 hover:bg-white/10 transition shadow-md"
           >
-            <div className="relative">
-              <img
-                src={friend.image}
-                alt={friend.username}
-                className="w-20 h-20 rounded-full ring-2 ring-pink-500"
-              />
-              <span
-                className={`absolute bottom-1 right-1 w-4 h-4 rounded-full border-2 border-black ${friend.isOnline ? "bg-green-500" : "bg-gray-500"
-                  }`}
-              ></span>
+            <img
+              src={friend.image || "https://i.ibb.co/vC5WKqSk/9187532.png"}
+              className="w-20 h-20 rounded-full object-cover ring-2 ring-blue-200"
+            />
+
+            <div className="text-center">
+              <p className="text-white font-semibold text-sm">
+                {friend.name}
+              </p>
+              <p className="text-gray-400 pt-1 text-xs">
+                {friend.email}
+              </p>
             </div>
-            <p className="text-white font-semibold text-lg">{friend.username}</p>
-            <p className="text-white/50 text-sm">
-              {friend.isOnline ? "Online" : "Offline"}
-            </p>
-            <button className="mt-2 px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded-full text-sm transition">
-              Message
+
+            <button
+              onClick={() => deleteFriend(friend.uid)}
+              className="my-2 flex items-center gap-1 px-4 py-2 text-sm bg-red-600 hover:bg-red-700 rounded-lg text-white"
+            >
+              <Trash2 size={14} />
+              Delete Friend
             </button>
           </div>
         ))}
