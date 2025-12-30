@@ -61,7 +61,7 @@ const AuthProvider = ({ children }) => {
 
     // 🔥 remove JWT cookie
     await axios.post(
-      "http://localhost:5000/logout",
+      "https://chatflow-studio-server.vercel.app/logout",
       {},
       { withCredentials: true }
     );
@@ -89,14 +89,14 @@ const AuthProvider = ({ children }) => {
       if (currentUser?.email) {
         // 🔑 CREATE JWT TOKEN
         await axios.post(
-          "http://localhost:5000/jwt",
+          "https://chatflow-studio-server.vercel.app/jwt",
           { email: currentUser.email },
           { withCredentials: true }
         );
       } else {
         // ❌ CLEAR JWT TOKEN
         await axios.post(
-          "http://localhost:5000/logout",
+          "https://chatflow-studio-server.vercel.app/logout",
           {},
           { withCredentials: true }
         );

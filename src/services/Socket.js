@@ -1,6 +1,8 @@
 import { io } from 'socket.io-client';
 
-const SOCKET_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:5000';
+const SOCKET_URL =
+  import.meta.env.VITE_SERVER_URL ||
+  'https://chatflow-studio-server.vercel.app';
 
 const Socket = io(SOCKET_URL, {
   transports: ['websocket'],
