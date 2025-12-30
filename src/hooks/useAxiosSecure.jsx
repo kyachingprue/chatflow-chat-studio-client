@@ -1,22 +1,27 @@
 import axios from "axios";
-
-const axiosSecure = axios.create({
-  baseURL: "https://chatflow-studio-server.vercel.app",
-  withCredentials: true,
-});
+import { useMemo } from "react";
 
 const useAxiosSecure = () => {
-  axiosSecure.interceptors.response.use(
-    res => res,
-    error => {
-      if (error.response?.status === 401 || error.response?.status === 403) {
-        console.log("Unauthorized or forbidden");
-      }
-      return Promise.reject(error);
-    }
-  );
+  const axiosInstance = useMemo(() => {
+    const instance = axios.create({
+      baseURL: "https://chatflow-studio-server.vercel.app",
+      withCredentials: true,
+    });
 
-  return axiosSecure;
+    instance.interceptors.response.use(
+      res => res,
+      error => {
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          console.log("Unauthorized or forbidden");
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    return instance;
+  }, []);
+
+  return axiosInstance;
 };
 
 export default useAxiosSecure;

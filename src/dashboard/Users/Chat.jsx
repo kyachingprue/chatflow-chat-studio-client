@@ -27,7 +27,7 @@ const Chat = () => {
     queryKey: ["dbUser", user?.email],
     enabled: !!user?.email,
     queryFn: async () => {
-      const res = await axiosSecure.get(`/users/${user.email}`);
+      const res = await axiosSecure.get(`/users/${user?.email}`);
       return res.data;
     },
   });
@@ -38,7 +38,7 @@ const Chat = () => {
     enabled: !!userData?.uid,
     queryFn: async () => {
       if (!userData?.uid) return [];
-      const res = await axiosSecure.get(`/friends/${userData.uid}`);
+      const res = await axiosSecure.get(`/friends/${userData?.uid}`);
       return res.data;
     },
   });
@@ -50,7 +50,7 @@ const Chat = () => {
     const fetchMessages = async () => {
       try {
         const res = await axiosSecure.get(
-          `/messages?senderUid=${userData.uid}&receiverUid=${selectedFriend.uid || selectedFriend.friendUid}`
+          `/messages?senderUid=${userData?.uid}&receiverUid=${selectedFriend?.uid || selectedFriend.friendUid}`
         );
         setMessages(res.data);
       } catch (err) {
@@ -93,8 +93,8 @@ const Chat = () => {
     ? messages.filter(
       (m) =>
         (m.senderUid === userData?.uid &&
-          m.receiverUid === (selectedFriend.uid || selectedFriend.friendUid)) ||
-        (m.senderUid === (selectedFriend.uid || selectedFriend.friendUid) &&
+          m.receiverUid === (selectedFriend?.uid || selectedFriend?.friendUid)) ||
+        (m.senderUid === (selectedFriend?.uid || selectedFriend?.friendUid) &&
           m.receiverUid === userData?.uid)
     )
     : [];
@@ -104,13 +104,13 @@ const Chat = () => {
     if (!selectedFriend || !userData?.uid) return;
 
     const msg = {
-      senderUid: userData.uid,
-      receiverUid: selectedFriend.uid || selectedFriend.friendUid,
+      senderUid: userData?.uid,
+      receiverUid: selectedFriend?.uid || selectedFriend?.friendUid,
       text: text || "",
       image: selectedImage || "",
       createdAt: new Date(),
-      senderImage: userData.image,
-      receiverImage: selectedFriend.image,
+      senderImage: userData?.image,
+      receiverImage: selectedFriend?.image,
     };
 
     try {

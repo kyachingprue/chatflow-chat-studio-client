@@ -19,7 +19,7 @@ const Friends = () => {
     queryKey: ["friends", user?.uid],
     enabled: !!user?.uid,
     queryFn: async () => {
-      const res = await axiosSecure.get(`/friends/${user.uid}`);
+      const res = await axiosSecure.get(`/friends/${user?.uid}`);
       return res.data;
     },
   });
@@ -28,7 +28,7 @@ const Friends = () => {
     try {
       await axiosSecure.delete("/friends", {
         data: {
-          userUid: user.uid,
+          userUid: user?.uid,
           friendUid,
         },
       });

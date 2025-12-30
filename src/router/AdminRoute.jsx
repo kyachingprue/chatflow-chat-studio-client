@@ -12,7 +12,7 @@ const AdminRoute = ({ children }) => {
     queryKey: ["dbUser", user?.email],
     enabled: !!user?.email,
     queryFn: async () => {
-      const res = await axiosSecure.get(`/users/${user.email}`);
+      const res = await axiosSecure.get(`/users/${user?.email}`);
       return res.data;
     },
   });

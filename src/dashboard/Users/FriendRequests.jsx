@@ -16,7 +16,7 @@ const FriendRequests = () => {
     enabled: !!user?.uid,
     queryFn: async () => {
       const res = await axiosSecure.get(
-        `/friends/requests/sent/${user.uid}`
+        `/friends/requests/sent/${user?.uid}`
       );
       return res.data;
     },
@@ -31,7 +31,7 @@ const FriendRequests = () => {
     enabled: !!user?.uid,
     queryFn: async () => {
       const res = await axiosSecure.get(
-        `/friends/requests/received/${user.uid}`
+        `/friends/requests/received/${user?.uid}`
       );
       return res.data;
     },
@@ -42,7 +42,7 @@ const FriendRequests = () => {
     try {
       await axiosSecure.delete("/friends/request", {
         data: {
-          senderUid: user.uid,
+          senderUid: user?.uid,
           receiverUid,
         },
       });
@@ -58,7 +58,7 @@ const FriendRequests = () => {
     try {
       await axiosSecure.post("/friends/accept", {
         senderUid,
-        receiverUid: user.uid,
+        receiverUid: user?.uid,
       });
       toast.success("Friend added successfully 🎉");
       refetchReceived();
@@ -73,7 +73,7 @@ const FriendRequests = () => {
       await axiosSecure.delete("/friends/request", {
         data: {
           senderUid,
-          receiverUid: user.uid,
+          receiverUid: user?.uid,
         },
       });
       toast.success("Friend request rejected");

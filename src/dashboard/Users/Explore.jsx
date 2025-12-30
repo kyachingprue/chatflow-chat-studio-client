@@ -31,7 +31,7 @@ const Explore = () => {
     queryKey: ["dbUser", user?.email],
     enabled: !!user?.email,
     queryFn: async () => {
-      const res = await axiosSecure.get(`/users/${user.email}`);
+      const res = await axiosSecure.get(`/users/${user?.email}`);
       return res.data;
     },
   });
@@ -41,7 +41,7 @@ const Explore = () => {
     queryKey: ["friends", userData?.uid],
     enabled: !!userData?.uid,
     queryFn: async () => {
-      const res = await axiosSecure.get(`/friends/${userData.uid}`);
+      const res = await axiosSecure.get(`/friends/${userData?.uid}`);
       return res.data;
     },
   });
@@ -51,7 +51,7 @@ const Explore = () => {
     queryKey: ["friendRequests", userData?.uid],
     enabled: !!userData?.uid,
     queryFn: async () => {
-      const res = await axiosSecure.get(`/friends/requests/${userData.uid}`);
+      const res = await axiosSecure.get(`/friends/requests/${userData?.uid}`);
       return res.data;
     },
   });

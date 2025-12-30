@@ -21,7 +21,7 @@ const AddFriend = () => {
     queryKey: ["unknown-users", user?.uid],
     enabled: !!user?.uid,
     queryFn: async () => {
-      const res = await axiosSecure.get(`/users/unknown/${user.uid}`);
+      const res = await axiosSecure.get(`/users/unknown/${user?.uid}`);
       return res.data;
     },
   });
@@ -44,13 +44,13 @@ const AddFriend = () => {
       setLoadingId(uid);
 
       await axiosSecure.post("/friends/request", {
-        senderUid: user.uid,
+        senderUid: user?.uid,
         receiverUid: uid,
       });
 
       if (socket) {
         socket.emit("friend-request", {
-          senderUid: user.uid,
+          senderUid: user?.uid,
           receiverUid: uid,
         });
       }
@@ -72,7 +72,7 @@ const AddFriend = () => {
     try {
       setLoadingId(uid);
       await axiosSecure.delete("/friends/request", {
-        data: { senderUid: user.uid, receiverUid: uid },
+        data: { senderUid: user?.uid, receiverUid: uid },
       });
       toast.success("Friend request remove successfully")
       refetch();

@@ -55,11 +55,8 @@ const AuthProvider = ({ children }) => {
     }
   };
 
-  // ✅ Logout (JWT removed from backend)
   const logoutUser = async () => {
     setLoading(true);
-
-    // 🔥 remove JWT cookie
     await axios.post(
       "https://chatflow-studio-server.vercel.app/logout",
       {},
@@ -79,22 +76,17 @@ const AuthProvider = ({ children }) => {
     return confirmPasswordReset(auth, oobCode, newPassword);
   };
 
-  // ==========================
-  // 🔐 JWT SETUP IS HERE
-  // ==========================
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
 
       if (currentUser?.email) {
-        // 🔑 CREATE JWT TOKEN
         await axios.post(
           "https://chatflow-studio-server.vercel.app/jwt",
-          { email: currentUser.email },
+          { email: currentUser?.email },
           { withCredentials: true }
         );
       } else {
-        // ❌ CLEAR JWT TOKEN
         await axios.post(
           "https://chatflow-studio-server.vercel.app/logout",
           {},
