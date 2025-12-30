@@ -14,7 +14,7 @@ const DEFAULT_COVER = "https://i.ibb.co/default-cover.jpg";
 const DEFAULT_PROFILE = "https://i.ibb.co/17761113/default-profile.png";
 
 const Profile = () => {
-  const { user } = useAuth(); // 🔑 only email needed
+  const { user } = useAuth(); 
   const axiosSecure = useAxiosSecure();
 
   const coverInputRef = useRef(null);
@@ -23,12 +23,11 @@ const Profile = () => {
   const [userData, setUserData] = useState(null);
   const [uploading, setUploading] = useState(false);
 
-  /* ================= FETCH MONGODB USER ================= */
   useEffect(() => {
     if (!user?.email) return;
 
     axiosSecure
-      .get(`/users/${user.email}`)
+      .get(`/users/${user?.email}`)
       .then((res) => {
         setUserData(res.data);
       })

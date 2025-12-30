@@ -5,7 +5,7 @@ import { motion } from "motion/react";
 
 const CheckEmail = () => {
   const navigate = useNavigate();
-  const [seconds, setSeconds] = useState(12); // ✅ 12 seconds countdown
+  const [seconds, setSeconds] = useState(12); 
 
   useEffect(() => {
     if (seconds === 0) {

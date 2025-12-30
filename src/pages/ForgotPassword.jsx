@@ -16,11 +16,11 @@ const ForgotPassword = () => {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      await forgotPassword(data.email);
+      await forgotPassword(data?.email);
       toast.success("Password reset email sent! Check your inbox.");
       setTimeout(() => {
         navigate("/check-email");
-      }, 2000); // 2 seconds delay
+      }, 2000); 
     } catch (error) {
       toast.error(error.message || "Failed to send reset email");
     } finally {

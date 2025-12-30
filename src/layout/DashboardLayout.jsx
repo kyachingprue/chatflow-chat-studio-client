@@ -31,7 +31,7 @@ const DashboardLayout = () => {
     queryKey: ["dbUser", user?.email],
     enabled: !!user?.email,
     queryFn: async () => {
-      const res = await axiosSecure.get(`/users/${user.email}`);
+      const res = await axiosSecure.get(`/users/${user?.email}`);
       return res.data;
     },
   });
@@ -51,7 +51,7 @@ const DashboardLayout = () => {
     enabled: !!user?.uid,
     queryFn: async () => {
       const res = await axiosSecure.get(
-        `/friends/requests/count/${user.uid}`
+        `/friends/requests/count/${user?.uid}`
       );
       setRequestCount(res.data.count);
       return res.data;

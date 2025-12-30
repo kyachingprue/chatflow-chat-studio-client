@@ -15,7 +15,7 @@ const useSocket = () => {
     }
 
     const onConnect = () => {
-      Socket.emit("join", user.uid);
+      Socket.emit("join", user?.uid);
       setSocket(Socket);
     };
 
