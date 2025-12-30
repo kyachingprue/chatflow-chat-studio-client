@@ -16,7 +16,6 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // 🔹 TanStack mutation to update verification status
   const verifyMutation = useMutation({
     mutationFn: async (email) => {
       const res = await axiosPublic.patch(`/users/verify`, { email });
